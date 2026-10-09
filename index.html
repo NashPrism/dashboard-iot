@@ -77,7 +77,7 @@
     <script>
         // Conexión mediante WebSockets usando MQTT.js (nota el prefijo 'ws://' y el puerto '8080')
         const clientId = 'web_' + Math.random().toString(16).substr(2, 8);
-        const client = mqtt.connect('ws://test.mosquitto.org:8080/mqtt', { clientId: clientId });
+        const client = mqtt.connect('wss://test.mosquitto.org:8081', { clientId: clientId });
 
         client.on('connect', () => {
             console.log("Conectado al broker MQTT con MQTT.js");
