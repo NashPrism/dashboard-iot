@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>TP Control con IoT - Cardozo</title>
-    <!-- Librería MQTT para la web -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <!-- Librería MQTT.js en lugar de Paho -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -26,13 +26,13 @@
         /* Todos los textos principales con la misma fuente y tamaño unificado */
         h1, p, #tempBox {
             font-family: Arial, sans-serif;
-            font-size: 2.5vw; /* Se ajusta de forma fluida a la pantalla */
+            font-size: 2.5vw;
             font-weight: bold;
             color: #ffffff;
             width: 100%;
         }
         #tempBox {
-            color: #00ffcc; /* Un color destacado para el valor de temperatura */
+            color: #00ffcc;
         }
         .contenedor-botones {
             display: flex;
@@ -54,7 +54,6 @@
         .btn-abrir { background-color: #28a745; }
         .btn-cerrar { background-color: #dc3545; }
 
-        /* Para pantallas más chicas (como celulares), aseguramos un tamaño legible */
         @media (max-width: 768px) {
             h1, p, #tempBox { font-size: 5vw; }
             button { font-size: 4vw; }
@@ -65,41 +64,38 @@
 </head>
 <body>
 
-    <!-- 2. Título pedido en el pizarrón -->
     <h1>TP Control con IoT - Cardozo</h1>
 
-    <!-- 3. Apartado de temperatura -->
     <p>TEMPERATURA:</p>
     <div id="tempBox">Esperando datos...</div>
 
-    <!-- 4. Botones para Abrir y Cerrar -->
     <div class="contenedor-botones">
         <button class="btn-abrir" onclick="enviarComando('1')">ABRIR</button>
         <button class="btn-cerrar" onclick="enviarComando('0')">CERRAR</button>
     </div>
 
     <script>
-        // Configuración de conexión MQTT por WebSockets
-        const client = new Paho.MQTT.Client("test.mosquitto.org", Number(8081), "web_" + parseInt(Math.random() * 100000));
+        // Conexión mediante WebSockets usando MQTT.js (nota el prefijo 'ws://' y el puerto '8080')
+        const clientId = 'web_' + Math.random().toString(16).substr(2, 8);
+        const client = mqtt.connect('ws://test.mosquitto.org:8080/mqtt', { clientId: clientId });
 
-        client.onConnectionLost = response => console.log("Conexión perdida: " + response.errorMessage);
-        client.onMessageArrived = message => {
-            if (message.destinationName === "etusiemens/Cardozo/temperatura") {
-                document.getElementById("tempBox").innerText = message.payloadString + " °C";
-            }
-        };
+        client.on('connect', () => {
+            console.log("Conectado al broker MQTT con MQTT.js");
+            client.subscribe("etusiemens/Cardozo/temperatura", (err) => {
+                if (!err) {
+                    console.log("Suscrito al tópico de temperatura");
+                }
+            });
+        });
 
-        client.connect({
-            onSuccess: () => {
-                console.log("Conectado al broker MQTT");
-                client.subscribe("etusiemens/Cardozo/temperatura");
+        client.on('message', (topic, payload) => {
+            if (topic === "etusiemens/Cardozo/temperatura") {
+                document.getElementById("tempBox").innerText = payload.toString() + " °C";
             }
         });
 
         function enviarComando(valor) {
-            message = new Paho.MQTT.Message(valor);
-            message.destinationName = "etusiemens/Cardozo/servo";
-            client.send(message);
+            client.publish("etusiemens/Cardozo/servo", valor);
         }
     </script>
 </body>
