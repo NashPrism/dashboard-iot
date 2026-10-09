@@ -80,7 +80,7 @@
 
     <script>
         // Configuración de conexión MQTT por WebSockets
-        const client = new Paho.MQTT.Client("test.mosquitto.org", Number(1883), "web_" + parseInt(Math.random() * 100000));
+        const client = new Paho.MQTT.Client("test.mosquitto.org", Number(8081), "web_" + parseInt(Math.random() * 100000));
 
         client.onConnectionLost = response => console.log("Conexión perdida: " + response.errorMessage);
         client.onMessageArrived = message => {
