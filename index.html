@@ -6,12 +6,61 @@
     <!-- Librería MQTT para la web -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f9; }
-        h1 { color: #333; }
-        #tempBox { font-size: 24px; margin: 20px; color: #007BFF; font-weight: bold; }
-        button { padding: 15px 30px; font-size: 18px; margin: 10px; cursor: pointer; border: none; border-radius: 5px; color: white; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+        /* Todos los textos principales con la misma fuente y tamaño unificado */
+        h1, p, #tempBox {
+            font-family: Arial, sans-serif;
+            font-size: 2.5vw; /* Se ajusta de forma fluida a la pantalla */
+            font-weight: bold;
+            color: #ffffff;
+            width: 100%;
+        }
+        #tempBox {
+            color: #00ffcc; /* Un color destacado para el valor de temperatura */
+        }
+        .contenedor-botones {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            justify-content: center;
+        }
+        button {
+            padding: 20px 40px;
+            font-size: 2vw;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            flex: 1;
+            max-width: 300px;
+        }
         .btn-abrir { background-color: #28a745; }
         .btn-cerrar { background-color: #dc3545; }
+
+        /* Para pantallas más chicas (como celulares), aseguramos un tamaño legible */
+        @media (max-width: 768px) {
+            h1, p, #tempBox { font-size: 5vw; }
+            button { font-size: 4vw; }
+            .contenedor-botones { flex-direction: column; align-items: center; }
+            button { width: 80%; max-width: none; }
+        }
     </style>
 </head>
 <body>
@@ -24,9 +73,10 @@
     <div id="tempBox">Esperando datos...</div>
 
     <!-- 4. Botones para Abrir y Cerrar -->
-    <br>
-    <button class="btn-abrir" onclick="enviarComando('1')">ABRIR</button>
-    <button class="btn-cerrar" onclick="enviarComando('0')">CERRAR</button>
+    <div class="contenedor-botones">
+        <button class="btn-abrir" onclick="enviarComando('1')">ABRIR</button>
+        <button class="btn-cerrar" onclick="enviarComando('0')">CERRAR</button>
+    </div>
 
     <script>
         // Configuración de conexión MQTT por WebSockets
