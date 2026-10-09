@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>TP Control con IoT - Cardozo</title>
+    <!-- Librería MQTT para la web -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f9; }
+        h1 { color: #333; }
+        #tempBox { font-size: 24px; margin: 20px; color: #007BFF; font-weight: bold; }
+        button { padding: 15px 30px; font-size: 18px; margin: 10px; cursor: pointer; border: none; border-radius: 5px; color: white; }
+        .btn-abrir { background-color: #28a745; }
+        .btn-cerrar { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+
+    <!-- 2. Título pedido en el pizarrón -->
+    <h1>TP Control con IoT - Cardozo</h1>
+
+    <!-- 3. Apartado de temperatura -->
+    <p>TEMPERATURA:</p>
+    <div id="tempBox">Esperando datos...</div>
+
+    <!-- 4. Botones para Abrir y Cerrar -->
+    <br>
+    <button class="btn-abrir" onclick="enviarComando('1')">ABRIR</button>
+    <button class="btn-cerrar" onclick="enviarComando('0')">CERRAR</button>
+
+    <script>
+        // Configuración de conexión MQTT por WebSockets
+        const client = new Paho.MQTT.Client("test.mosquitto.org", Number(8080), "web_" + parseInt(Math.random() * 100000));
+
+        client.onConnectionLost = response => console.log("Conexión perdida: " + response.errorMessage);
+        client.onMessageArrived = message => {
+            if (message.destinationName === "etusiemens/Cardozo/temperatura") {
+                document.getElementById("tempBox").innerText = message.payloadString + " °C";
+            }
+        };
+
+        client.connect({
+            onSuccess: () => {
+                console.log("Conectado al broker MQTT");
+                client.subscribe("etusiemens/Cardozo/temperatura");
+            }
+        });
+
+        function enviarComando(valor) {
+            message = new Paho.MQTT.Message(valor);
+            message.destinationName = "etusiemens/Cardozo/servo";
+            client.send(message);
+        }
+    </script>
+</body>
+</html>
